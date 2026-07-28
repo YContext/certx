@@ -137,6 +137,12 @@ body {
   max-width: 780px;
   margin: 0 auto;
   padding: 0 24px 64px;
+  transition: max-width 0.3s ease;
+}
+
+/* Expand to full width on big screens when editor is active */
+.app--wide {
+  max-width: 1400px;
 }
 
 /* ───────── Steps ───────── */
@@ -804,4 +810,365 @@ body {
 
 .modal__close:hover {
   background: rgba(0, 0, 0, 0.7);
+}
+
+/* ───────── Editor Layout ───────── */
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 20px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .editor-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* On very wide screens, give the canvas more room and panel fixed width */
+@media (min-width: 1200px) {
+  .editor-layout {
+    grid-template-columns: 1fr 320px;
+    gap: 28px;
+  }
+}
+
+/* ─── Editor Canvas (template preview) ─── */
+.editor-canvas {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-canvas__inner {
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: repeating-conic-gradient(#e8ecf4 0% 25%, transparent 0% 50%) 0 0 / 20px 20px;
+}
+
+.editor-canvas__inner img {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* On big screens constrain by height so it fills the viewport nicely */
+@media (min-width: 1200px) {
+  .editor-canvas__inner img {
+    max-height: 75vh;
+  }
+}
+
+.editor-canvas__hint {
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: center;
+  border-top: 1px solid var(--border);
+  background: #fafbfc;
+}
+
+/* ─── Draggable Overlay Elements ─── */
+.editor-overlay {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  will-change: left, top;
+  z-index: 2;
+  overflow: visible;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #1a1a2e;
+  border: 1.5px solid transparent;
+  border-radius: 2px;
+  padding: 1px 3px;
+  margin: -1px -3px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.editor-overlay:hover {
+  z-index: 4;
+  border-color: rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.04);
+}
+
+.editor-overlay--dragging {
+  opacity: 0.9;
+  transform: scale(1.04);
+  box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary), 0 8px 24px rgba(0,0,0,0.15);
+  transition: none !important;
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+.editor-overlay::after {
+  display: none;
+}
+
+.editor-overlay--selected {
+  z-index: 5 !important;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px white, 0 0 0 3px var(--primary);
+  background: rgba(99, 102, 241, 0.06);
+  cursor: grabbing;
+}
+
+.editor-overlay__label {
+  pointer-events: none;
+  display: block;
+}
+
+.editor-overlay__coords {
+  font-size: 0.55rem;
+  font-weight: 500;
+  opacity: 0.7;
+  margin-top: 1px;
+  pointer-events: none;
+  display: none;
+}
+
+.editor-overlay:hover .editor-overlay__coords,
+.editor-overlay--selected .editor-overlay__coords {
+  display: block;
+}
+
+/* Color variant backgrounds — removed for clean preview look */
+
+/* ─── Disabled (deleted) overlay ─── */
+.editor-overlay--disabled {
+  opacity: 0.25 !important;
+  border: 1.5px dashed rgba(200,200,200,0.5) !important;
+  cursor: default !important;
+  pointer-events: none !important;
+  text-decoration: line-through;
+}
+
+.editor-overlay--disabled::after {
+  display: none;
+}
+
+/* ─── Resize handle ─── */
+.editor-overlay__resize {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  cursor: ew-resize;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.editor-overlay:hover .editor-overlay__resize,
+.editor-overlay--selected .editor-overlay__resize {
+  opacity: 1;
+}
+
+.editor-overlay__resize::after {
+  content: '';
+  width: 4px;
+  height: 50%;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.7);
+  transition: background 0.15s ease;
+}
+
+.editor-overlay__resize:hover::after {
+  background: white;
+}
+
+.editor-overlay__width-label {
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.editor-overlay--selected .editor-overlay__width-label,
+.editor-overlay:hover .editor-overlay__width-label {
+  opacity: 1;
+}
+
+/* ─── Properties Panel ─── */
+.editor-panel {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #fafbfc;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.editor-panel__section {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.editor-panel__section:last-child,
+.editor-panel__section--fill {
+  border-bottom: none;
+}
+
+.editor-panel__section--fill {
+  flex: 1;
+}
+
+.editor-panel__field-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.editor-panel__field-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.editor-pos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.editor-pos__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.editor-pos strong {
+  color: var(--text);
+  font-weight: 700;
+  min-width: 28px;
+}
+
+.editor-pos__input {
+  width: 56px;
+  padding: 3px 6px;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.editor-pos__input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+.editor-pos__nudge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: var(--transition);
+  padding: 0;
+}
+
+.editor-pos__nudge:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.editor-pos__nudge:active {
+  transform: scale(0.9);
+}
+
+.editor-pos__sep {
+  color: var(--border);
+  font-size: 1rem;
+  font-weight: 200;
+}
+
+/* ─── Button Groups ─── */
+.btn-group {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.btn-group .btn {
+  padding: 5px 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-group .btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.editor-align-btn--active,
+.editor-fs-btn--active {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: white !important;
+}
+
+.editor-form .form-input {
+  padding: 8px 10px;
+  font-size: 0.8rem;
+}
+
+.editor-form .form-label {
+  font-size: 0.7rem;
 }

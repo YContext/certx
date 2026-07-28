@@ -119,6 +119,16 @@ app.post('/api/generate', (req, res) => {
       const signatory = req.body.signatory?.trim() || 'Jane Smith';
       const date = req.body.date?.trim() || new Date().toISOString().slice(0, 10);
 
+      // Parse custom positions (JSON string from form-data)
+      let positions = null;
+      try {
+        if (req.body.positions) {
+          positions = JSON.parse(req.body.positions);
+        }
+      } catch {
+        // ignore invalid JSON, fall back to defaults
+      }
+
       // Parse CSV
       const { records, nameColumn } = parseCSV(csvFile.path);
       const names = extractNames(records, nameColumn);
@@ -132,7 +142,7 @@ app.post('/api/generate', (req, res) => {
       const batchDir = path.join(generatedDir, batchId);
       fs.mkdirSync(batchDir, { recursive: true });
 
-      // Generate certificates
+      // Generate certificates with custom positions
       const results = await buildCertificates({
         templatePath: templateFile.path,
         names,
@@ -141,6 +151,7 @@ app.post('/api/generate', (req, res) => {
         signatory,
         date,
         outputDir: batchDir,
+        positions,
       });
 
       // Build response with download URLs

@@ -42,12 +42,12 @@
     <div class="steps" id="steps">
       <div class="step step--active" data-step="1">
         <span class="step__num">1</span>
-        <span class="step__label">Upload Files</span>
+        <span class="step__label">Upload</span>
       </div>
       <div class="step__line"></div>
       <div class="step" data-step="2">
         <span class="step__num">2</span>
-        <span class="step__label">Configure</span>
+        <span class="step__label">Position &amp; Configure</span>
       </div>
       <div class="step__line"></div>
       <div class="step" data-step="3">
@@ -110,31 +110,118 @@
       </div>
 
       <div class="card__actions">
-        <button class="btn btn--primary" id="btn-to-config" disabled>Continue →</button>
+        <button class="btn btn--primary" id="btn-to-editor" disabled>Continue →</button>
       </div>
     </section>
 
-    <!-- Step 2: Configure -->
+    <!-- Step 2: Position & Configure -->
     <section class="card" id="step2" style="display:none">
-      <h2 class="card__title">Configure Certificate Details</h2>
-      <p class="card__desc">Set the title, description, signatory, and date for your certificates.</p>
+      <h2 class="card__title">Position &amp; Configure Certificate</h2>
+      <p class="card__desc">Drag text boxes on the template to position them. Click a box to adjust its alignment &amp; size. Edit the content below.</p>
 
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label" for="title">Certificate Title</label>
-          <input class="form-input" type="text" id="title" value="Certificate of Completion" />
+      <div class="editor-layout">
+        <!-- ── Template Preview ── -->
+        <div class="editor-canvas" id="editor-canvas">
+          <div class="editor-canvas__inner" id="editor-canvas-inner">
+            <img id="editor-template-img" alt="Template preview" />
+            <!-- Draggable overlays injected by JS -->
+          </div>
+          <div class="editor-canvas__hint">🖱️ Drag text to reposition &nbsp;·&nbsp; Click to select</div>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="date">Date</label>
-          <input class="form-input" type="date" id="date" />
-        </div>
-        <div class="form-group form-group--wide">
-          <label class="form-label" for="description">Description</label>
-          <input class="form-input" type="text" id="description" value="Awarded for participation" />
-        </div>
-        <div class="form-group form-group--wide">
-          <label class="form-label" for="signatory">Signatory (Staff in Charge)</label>
-          <input class="form-input" type="text" id="signatory" value="Jane Smith" />
+
+        <!-- ── Properties Panel ── -->
+        <div class="editor-panel" id="editor-panel">
+          <!-- Selected element properties -->
+          <div class="editor-panel__section">
+            <div class="editor-panel__field-label">Selected Element</div>
+            <div class="editor-panel__field-name" id="editor-selected-name">Title</div>
+          </div>
+
+          <div class="editor-panel__section">
+            <div class="editor-panel__field-label">Alignment</div>
+            <div class="btn-group" id="editor-align">
+              <button class="btn btn--sm editor-align-btn" data-align="left" title="Left align">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="19" y2="18"/></svg>
+              </button>
+              <button class="btn btn--sm editor-align-btn editor-align-btn--active" data-align="center" title="Center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+              </button>
+              <button class="btn btn--sm editor-align-btn" data-align="right" title="Right align">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="5" y1="18" x2="21" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="editor-panel__section">
+            <div class="editor-panel__field-label">Font Size</div>
+            <div class="btn-group" id="editor-fontsize">
+              <button class="btn btn--sm editor-fs-btn" data-fs="XS">XS</button>
+              <button class="btn btn--sm editor-fs-btn" data-fs="S">S</button>
+              <button class="btn btn--sm editor-fs-btn editor-fs-btn--active" data-fs="M">M</button>
+              <button class="btn btn--sm editor-fs-btn" data-fs="L">L</button>
+              <button class="btn btn--sm editor-fs-btn" data-fs="XL">XL</button>
+            </div>
+          </div>
+
+          <div class="editor-panel__section">
+            <div class="editor-panel__field-label">Position <span style="font-weight:400;text-transform:none;letter-spacing:0">(arrow keys)</span></div>
+            <div class="editor-pos" id="editor-pos">
+              <div class="editor-pos__row">
+                <strong>X:</strong>
+                <button class="editor-pos__nudge" data-axis="x" data-dir="-1" title="Nudge left">−</button>
+                <input class="editor-pos__input" id="editor-pos-input-x" type="number" min="0" max="100" step="0.5" value="50" />
+                <button class="editor-pos__nudge" data-axis="x" data-dir="1" title="Nudge right">+</button>
+                <span class="editor-pos__sep">|</span>
+                <strong>Y:</strong>
+                <button class="editor-pos__nudge" data-axis="y" data-dir="-1" title="Nudge up">−</button>
+                <input class="editor-pos__input" id="editor-pos-input-y" type="number" min="0" max="100" step="0.5" value="12" />
+                <button class="editor-pos__nudge" data-axis="y" data-dir="1" title="Nudge down">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-panel__section">
+            <div class="editor-panel__field-label">Width</div>
+            <div class="editor-pos">
+              <div class="editor-pos__row">
+                <strong>W:</strong>
+                <button class="editor-pos__nudge" data-width="-5" title="Narrower">−</button>
+                <input class="editor-pos__input" id="editor-pos-input-w" type="number" min="10" max="100" step="5" value="70" />
+                <button class="editor-pos__nudge" data-width="5" title="Wider">+</button>
+                <span style="font-size:0.75rem;color:var(--text-secondary);margin-left:4px">% of template</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-panel__section">
+            <div class="editor-panel__field-label" style="display:flex;align-items:center;gap:8px">
+              Element Status
+              <button class="btn btn--sm" id="editor-btn-toggle" style="padding:3px 10px;font-size:0.7rem;border:1.5px solid var(--danger);color:var(--danger);background:transparent;border-radius:4px;cursor:pointer">🗑 Delete</button>
+            </div>
+            <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px" id="editor-status-text">Active on certificate</div>
+          </div>
+
+          <div class="editor-panel__section editor-panel__section--fill">
+            <div class="editor-panel__field-label">Text Content</div>
+            <div class="form-grid editor-form">
+              <div class="form-group">
+                <label class="form-label" for="title">Title</label>
+                <input class="form-input" type="text" id="title" value="Certificate of Completion" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="date">Date</label>
+                <input class="form-input" type="date" id="date" />
+              </div>
+              <div class="form-group form-group--wide">
+                <label class="form-label" for="description">Description</label>
+                <input class="form-input" type="text" id="description" value="Awarded for participation" />
+              </div>
+              <div class="form-group form-group--wide">
+                <label class="form-label" for="signatory">Signatory</label>
+                <input class="form-input" type="text" id="signatory" value="Jane Smith" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
