@@ -15,10 +15,18 @@
   <nav class="nav">
     <div class="nav__inner">
       <a href="/" class="nav__logo">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <svg class="nav__logo-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
         CertX
       </a>
-      <div class="nav__badge">v2.0</div>
+      <div class="nav__actions">
+        <div class="nav__badge">v2.0</div>
+        <a href="https://github.com/YContext/certx" target="_blank" rel="noopener" class="nav__github-btn" title="GitHub Repository">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+          </svg>
+          Star
+        </a>
+      </div>
     </div>
   </nav>
 
@@ -159,11 +167,19 @@
           </div>
 
           <div class="toolbar-group">
-            <button class="toolbar-btn" id="tool-undo" title="Undo (Ctrl+Z)">↶</button>
-            <button class="toolbar-btn" id="tool-redo" title="Redo (Ctrl+Shift+Z)">↷</button>
+            <button class="toolbar-btn" id="tool-undo" title="Undo (Ctrl+Z)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+            </button>
+            <button class="toolbar-btn" id="tool-redo" title="Redo (Ctrl+Shift+Z)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+            </button>
             <span class="toolbar-divider"></span>
-            <button class="toolbar-btn" id="tool-duplicate" title="Duplicate (Ctrl+D)">⧉</button>
-            <button class="toolbar-btn" id="tool-delete" title="Delete (Del)">🗑</button>
+            <button class="toolbar-btn" id="tool-duplicate" title="Duplicate (Ctrl+D)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+            <button class="toolbar-btn" id="tool-delete" title="Delete (Del)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </button>
             <span class="toolbar-divider"></span>
             <button class="toolbar-btn" id="tool-front" title="Bring to front">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4-7 4-7-4 7-4z"/><path d="M5 13l7 4 7-4"/></svg>
@@ -286,12 +302,16 @@
   <!-- ─── Footer ─── -->
   <footer class="site-footer">
     <div class="site-footer__inner">
-     
-        <span class="site-footer__text">
-        © <span id="footer-year"></span> CertX 
+      <span class="site-footer__text">
+        © <span id="footer-year"></span> CertX · 
         <a href="https://github.com/YContext/certx/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
       </span>
-      
+      <a href="https://github.com/YContext/certx" target="_blank" rel="noopener" class="site-footer__github" title="Visit CertX GitHub Repository">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="github-icon">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </svg>
+        GitHub
+      </a>
     </div>
   </footer>
 

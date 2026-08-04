@@ -168,7 +168,13 @@
     hide(els.step1); hide(els.step2); hide(els.step3);
     els.app.classList.toggle('app--wide', step === 2);
     if (step === 1) show(els.step1);
-    if (step === 2) { show(els.step2); if (!editor.initialized) initEditor(); }
+    if (step === 2) {
+      show(els.step2);
+      if (!editor.initialized) initEditor();
+      setTimeout(() => {
+        if (els.zoomFit) els.zoomFit.click();
+      }, 150);
+    }
     if (step === 3) show(els.step3);
   }
 
@@ -1288,23 +1294,45 @@
 
   const panelEmptyHTML = () => `
     <div class="panel-empty">
-      <div class="panel-empty__icon">🎨</div>
+      <div class="panel-empty__icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary);margin-bottom:12px;"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.34771 19.5 5.253 20 4.5 20C3.5 20 3 21 4 21.5C5 22 9 22 12 22Z"/><circle cx="7.5" cy="10.5" r="1.5" fill="currentColor"/><circle cx="11.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="16.5" cy="9.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="14.5" r="1.5" fill="currentColor"/></svg>
+      </div>
       <div class="panel-empty__title">Design your certificate</div>
       <div class="panel-empty__sub">Select an element to edit it, or add something new. Everything renders on the generated certificates.</div>
       <div class="panel-empty__grid">
-        <button class="panel-empty__btn" data-add="text">➕<span>Text</span></button>
-        <button class="panel-empty__btn" data-add="csv">📊<span>Data field</span></button>
-        <button class="panel-empty__btn" data-add="rect">▭<span>Rectangle</span></button>
-        <button class="panel-empty__btn" data-add="ellipse">◯<span>Ellipse</span></button>
-        <button class="panel-empty__btn" data-add="line">╱<span>Line</span></button>
-        <button class="panel-empty__btn" id="panel-duplicate" ${editor.clipboard.length ? '' : 'disabled'} style="${editor.clipboard.length ? '' : 'opacity:.4'}">📋<span>Paste</span></button>
+        <button class="panel-empty__btn" data-add="text">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Text</span>
+        </button>
+        <button class="panel-empty__btn" data-add="csv">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg>
+          <span>Data field</span>
+        </button>
+        <button class="panel-empty__btn" data-add="rect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          <span>Rectangle</span>
+        </button>
+        <button class="panel-empty__btn" data-add="ellipse">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+          <span>Ellipse</span>
+        </button>
+        <button class="panel-empty__btn" data-add="line">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="19" x2="19" y2="5"/></svg>
+          <span>Line</span>
+        </button>
+        <button class="panel-empty__btn" id="panel-duplicate" ${editor.clipboard.length ? '' : 'disabled'} style="${editor.clipboard.length ? '' : 'opacity:.4'}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+          <span>Paste</span>
+        </button>
       </div>
     </div>`;
 
   const panelMultiHTML = (n) => `
     <div class="panel__section">
       <div class="panel__name">
-        <div class="panel__name-icon">⧉</div>
+        <div class="panel__name-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </div>
         <div>
           <div class="panel__name-title">${n} elements selected</div>
           <div class="panel__name-sub">Use the toolbar to align &amp; distribute</div>
@@ -1314,10 +1342,22 @@
     <div class="panel__section">
       <div class="panel__label">Arrange</div>
       <div class="panel-actions">
-        <button class="panel-btn" data-act="duplicate">⧉ Duplicate</button>
-        <button class="panel-btn panel-btn--danger" data-act="delete">🗑 Delete</button>
-        <button class="panel-btn" data-act="front">⬆ To front</button>
-        <button class="panel-btn" data-act="back">⬇ To back</button>
+        <button class="panel-btn" data-act="duplicate">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Duplicate
+        </button>
+        <button class="panel-btn panel-btn--danger" data-act="delete">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Delete
+        </button>
+        <button class="panel-btn" data-act="front">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+          To front
+        </button>
+        <button class="panel-btn" data-act="back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+          To back
+        </button>
       </div>
     </div>
     ${layersHTML()}`;
@@ -1331,13 +1371,22 @@
       const color = el.type === 'text' || el.type === 'csv' ? (el.color || '#64748b')
         : el.type === 'line' ? (el.stroke || '#64748b') : (el.fill || '#64748b');
       const name = el.label || (el.type === 'text' ? 'Text' : el.type === 'csv' ? 'Data' : el.type);
+      
+      const eyeIcon = el.enabled 
+        ? `<svg class="layer-row__svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
+        : `<svg class="layer-row__svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
       return `
         <div class="layer-row${active}${hidden}" data-layer="${id}">
           <span class="layer-row__dot" style="background:${color}"></span>
           <span class="layer-row__name">${escapeHtml(name)}</span>
-          <button class="layer-row__btn" data-eye="${id}" title="${el.enabled ? 'Hide' : 'Show'}">${el.enabled ? '👁' : '🚫'}</button>
-          <button class="layer-row__btn" data-zup="${id}" title="Move up">▲</button>
-          <button class="layer-row__btn" data-zdown="${id}" title="Move down">▼</button>
+          <button class="layer-row__btn" data-eye="${id}" title="${el.enabled ? 'Hide' : 'Show'}">${eyeIcon}</button>
+          <button class="layer-row__btn" data-zup="${id}" title="Move up">
+            <svg class="layer-row__svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+          </button>
+          <button class="layer-row__btn" data-zdown="${id}" title="Move down">
+            <svg class="layer-row__svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
         </div>`;
     }).join('');
     return `
@@ -1350,11 +1399,19 @@
   function panelSingleHTML(id) {
     const el = editor.elements[id];
     const isText = el.type === 'text' || el.type === 'csv';
-    const icon = el.type === 'text' ? 'T' : el.type === 'csv' ? '⛁' : el.type === 'rect' ? '▭' : el.type === 'ellipse' ? '◯' : '╱';
+    
+    const getHeaderIcon = (type) => {
+      if (type === 'text') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>`;
+      if (type === 'csv') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg>`;
+      if (type === 'rect') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`;
+      if (type === 'ellipse') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>`;
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="19" x2="19" y2="5"/></svg>`;
+    };
+
     let html = `
       <div class="panel__section">
         <div class="panel__name">
-          <div class="panel__name-icon">${icon}</div>
+          <div class="panel__name-icon">${getHeaderIcon(el.type)}</div>
           <div>
             <div class="panel__name-title">${escapeHtml(el.label || el.type)}</div>
             <div class="panel__name-sub">${el.type === 'text' ? 'Static text' : el.type === 'csv' ? 'Data field' : el.type === 'rect' ? 'Rectangle' : el.type === 'ellipse' ? 'Ellipse' : 'Line'}</div>
@@ -1403,7 +1460,7 @@
           <div style="flex:1"></div>
           <select class="select" data-p="transform" style="width:130px">
             ${[['none', 'Aa'], ['uppercase', 'AA'], ['lowercase', 'aa'], ['capitalize', 'Aa']]
-              .map(([v, l]) => `<option value="${v}" ${(el.textTransform || 'none') === v ? 'selected' : ''}>${l}</option>`).join('')}
+               .map(([v, l]) => `<option value="${v}" ${(el.textTransform || 'none') === v ? 'selected' : ''}>${l}</option>`).join('')}
           </select>
         </div>
         <div class="panel__row" style="margin-top:8px">
@@ -1421,10 +1478,19 @@
         <div class="panel__label">Alignment</div>
         <div class="panel__row">
           <div class="seg" style="flex:1">
-            ${['left', 'center', 'right'].map((a) => `<button class="seg__btn ${el.align === a ? 'is-active' : ''}" data-p="align" data-val="${a}">${a === 'left' ? '⇤' : a === 'center' ? '⇹' : '⇥'}</button>`).join('')}
+            ${['left', 'center', 'right'].map((a) => {
+              const alignSvg = a === 'left' 
+                ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>`
+                : a === 'center'
+                ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/></svg>`
+                : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>`;
+              return `<button class="seg__btn ${el.align === a ? 'is-active' : ''}" data-p="align" data-val="${a}">${alignSvg}</button>`;
+            }).join('')}
           </div>
           <div class="seg" style="flex:1">
-            ${[['top', '⇑'], ['middle', '⇕'], ['bottom', '⇓']].map(([a, g]) => `<button class="seg__btn ${el.vAlign === a ? 'is-active' : ''}" data-p="vAlign" data-val="${a}">${g}</button>`).join('')}
+            ${[['top', `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="3" rx="1"/><line x1="12" y1="20" x2="12" y2="9"/><polyline points="8 13 12 9 16 13"/></svg>`],
+               ['middle', `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><polyline points="8 8 12 4 16 8"/><polyline points="8 16 12 20 16 16"/><line x1="12" y1="4" x2="12" y2="20"/></svg>`],
+               ['bottom', `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="18" width="16" height="3" rx="1"/><line x1="12" y1="4" x2="12" y2="15"/><polyline points="8 11 12 15 16 11"/></svg>`]].map(([a, g]) => `<button class="seg__btn ${el.vAlign === a ? 'is-active' : ''}" data-p="vAlign" data-val="${a}">${g}</button>`).join('')}
           </div>
         </div>
       </div>
@@ -1512,10 +1578,22 @@
           <button class="switch ${el.enabled ? 'is-on' : ''}" data-p="enabled" data-val="${el.enabled ? 1 : 0}"></button>
         </div>
         <div class="panel-actions" style="margin-top:10px">
-          <button class="panel-btn" data-act="duplicate">⧉ Duplicate</button>
-          <button class="panel-btn" data-act="front">⬆ Front</button>
-          <button class="panel-btn" data-act="back">⬇ Back</button>
-          <button class="panel-btn panel-btn--danger" data-act="delete">🗑 Delete</button>
+          <button class="panel-btn" data-act="duplicate">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Duplicate
+          </button>
+          <button class="panel-btn" data-act="front">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+            Front
+          </button>
+          <button class="panel-btn" data-act="back">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+            Back
+          </button>
+          <button class="panel-btn panel-btn--danger" data-act="delete">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
         </div>
       </div>
       ${layersHTML()}`;
@@ -1548,8 +1626,6 @@
         if (a === 'back') zMove('back');
         return;
       }
-      const layer = e.target.closest('[data-layer]');
-      if (layer) { selectOnly(layer.dataset.layer); return; }
       const eye = e.target.closest('[data-eye]');
       if (eye) {
         const el = editor.elements[eye.dataset.eye];
@@ -1560,6 +1636,8 @@
       if (zup) { selectOnly(zup.dataset.zup); zMove('forward'); return; }
       const zdown = e.target.closest('[data-zdown]');
       if (zdown) { selectOnly(zdown.dataset.zdown); zMove('backward'); return; }
+      const layer = e.target.closest('[data-layer]');
+      if (layer) { selectOnly(layer.dataset.layer); return; }
       const sw = e.target.closest('[data-color]');
       if (sw) {
         const el = editor.elements[[...editor.selection][0]];

@@ -71,6 +71,22 @@ body {
   letter-spacing: -0.02em;
 }
 
+.nav__logo-svg {
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--primary);
+}
+
+.nav__logo:hover .nav__logo-svg {
+  transform: scale(1.1) rotate(-6deg);
+  color: var(--primary-hover);
+}
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .nav__badge {
   font-size: 0.7rem;
   font-weight: 600;
@@ -79,6 +95,36 @@ body {
   background: var(--primary-light);
   color: var(--primary);
   letter-spacing: 0.02em;
+}
+
+.nav__github-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition: all 140ms ease;
+}
+
+.nav__github-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.nav__github-btn svg {
+  color: var(--text-secondary);
+  transition: color 140ms ease;
+}
+
+.nav__github-btn:hover svg {
+  color: var(--primary);
 }
 
 /* ───────── Hero ───────── */
@@ -1734,9 +1780,9 @@ body {
   margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 16px;
   font-size: 0.78rem;
   color: var(--text-secondary);
 }
@@ -1751,5 +1797,20 @@ body {
 .site-footer a:hover {
   color: var(--primary-hover);
   text-decoration: underline;
+}
+
+.site-footer__github {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.site-footer__github .github-icon {
+  flex-shrink: 0;
+  transition: transform 140ms ease;
+}
+
+.site-footer__github:hover .github-icon {
+  transform: rotate(12deg) scale(1.1);
 }
 
