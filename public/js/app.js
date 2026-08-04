@@ -328,6 +328,7 @@
   // ── Zoom / pan ────────────────────────────────────────────
   function applyView() {
     els.editorInner.style.transform = `translate(${editor.panX}px, ${editor.panY}px) scale(${editor.zoom})`;
+    els.editorInner.style.setProperty('--zoom', editor.zoom);
     updateZoomLabel();
     renderAll();
   }
@@ -375,13 +376,12 @@
   }
 
   function sampleText(el) {
-    if (el.type === 'text') return el.text || 'Text';
     const row = firstRow();
     const out = String(el.text || '').replace(/\{\{\s*([^}]+?)\s*\}\}/g, (m, col) => {
       const key = col.trim();
       return row && row[key] != null && row[key] !== '' ? String(row[key]) : `[${key}]`;
     });
-    return out || '[Data]';
+    return out || (el.type === 'csv' ? '[Data]' : '[Text]');
   }
 
   // ── Element DOM ───────────────────────────────────────────
@@ -395,7 +395,7 @@
     if (el.type === 'csv') node.classList.add('el--csv');
     if (!el.enabled) node.classList.add('el--hidden');
     const zoom = editor.zoom;
-    const px = (v) => v * zoom;
+    const px = (v) => v;
 
     if (el.type === 'text' || el.type === 'csv') {
       node.classList.add('el--text');
@@ -404,7 +404,11 @@
       node.style.width = el.width + '%';
       node.style.height = el.height + '%';
       node.style.opacity = el.opacity / 100;
-      if (el.bgColor && el.bgColor !== 'transparent') node.style.background = el.bgColor;
+      if (el.bgColor && el.bgColor !== 'transparent') {
+        node.style.background = el.bgColor;
+        const elH = (el.height / 100) * editor.naturalH;
+        node.style.borderRadius = Math.min(10, elH / 4) + 'px';
+      }
       if (el.rotation) {
         node.style.transform = `rotate(${el.rotation}deg)`;
         node.style.transformOrigin =

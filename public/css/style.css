@@ -1021,6 +1021,7 @@ body {
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   overflow: visible;
   pointer-events: none;
 }
@@ -1034,12 +1035,12 @@ body {
 }
 
 .el--selected {
-  outline: 1.5px solid var(--primary);
+  outline: calc(1.5px / var(--zoom, 1)) solid var(--primary);
   outline-offset: 0px;
 }
 
 .el--hovered {
-  outline: 1px dashed rgba(99, 102, 241, 0.55);
+  outline: calc(1px / var(--zoom, 1)) dashed rgba(99, 102, 241, 0.55);
 }
 
 .el__badge {
@@ -1057,6 +1058,8 @@ body {
   white-space: nowrap;
   pointer-events: none;
   display: none;
+  transform: scale(calc(1 / var(--zoom, 1)));
+  transform-origin: left bottom;
 }
 
 .el--selected .el__badge,
@@ -1076,6 +1079,7 @@ body {
   pointer-events: auto;
   display: none;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transform: scale(calc(1 / var(--zoom, 1)));
 }
 
 .el--selected .el__handle {
@@ -1083,19 +1087,19 @@ body {
 }
 
 .el__handle--nw { top: -6px; left: -6px; cursor: nwse-resize; }
-.el__handle--n  { top: -6px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+.el__handle--n  { top: -6px; left: 50%; transform: translateX(-50%) scale(calc(1 / var(--zoom, 1))); cursor: ns-resize; }
 .el__handle--ne { top: -6px; right: -6px; cursor: nesw-resize; }
-.el__handle--e  { top: 50%; right: -6px; transform: translateY(-50%); cursor: ew-resize; }
+.el__handle--e  { top: 50%; right: -6px; transform: translateY(-50%) scale(calc(1 / var(--zoom, 1))); cursor: ew-resize; }
 .el__handle--se { bottom: -6px; right: -6px; cursor: nwse-resize; }
-.el__handle--s  { bottom: -6px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+.el__handle--s  { bottom: -6px; left: 50%; transform: translateX(-50%) scale(calc(1 / var(--zoom, 1))); cursor: ns-resize; }
 .el__handle--sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
-.el__handle--w  { top: 50%; left: -6px; transform: translateY(-50%); cursor: ew-resize; }
+.el__handle--w  { top: 50%; left: -6px; transform: translateY(-50%) scale(calc(1 / var(--zoom, 1))); cursor: ew-resize; }
 
 .el__rotate {
   position: absolute;
   top: -30px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(calc(1 / var(--zoom, 1)));
   width: 15px;
   height: 15px;
   border: 1.5px solid var(--primary);

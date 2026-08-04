@@ -101,7 +101,7 @@ const FONT_FILES = {
   'Comic Sans MS': { r: 'comic.ttf', i: 'comici.ttf', b: 'comicbd.ttf', bi: 'comicz.ttf' },
   Consolas: { r: 'consola.ttf', i: 'consolai.ttf', b: 'consolab.ttf', bi: 'consolaz.ttf' },
   'Courier New': { r: 'cour.ttf', i: 'couri.ttf', b: 'courbd.ttf', bi: 'courbi.ttf' },
-  Garamond: { r: 'garamond.ttf' },
+  Garamond: { r: 'GARA.TTF', b: 'GARABD.TTF', i: 'GARAIT.TTF' },
   Georgia: { r: 'georgia.ttf', i: 'georgiai.ttf', b: 'georgiab.ttf', bi: 'georgiaz.ttf' },
   Impact: { r: 'impact.ttf' },
   'Lucida Calligraphy': { r: 'lcallig.ttf' },
@@ -197,18 +197,19 @@ function wrapText(text, maxWidth, fontSize, letterSpacing, family, weight, style
 
 // ── Element value resolution ───────────────────────────────────
 function resolveElementValue(el, row, participantName) {
-  if (el.type !== 'csv') {
-    return el.text == null ? '' : String(el.text);
-  }
   let template = el.text;
   if (template == null || template === '') {
-    template = el.csvColumn ? `{{${el.csvColumn}}}` : '{{Name}}';
+    if (el.type === 'csv') {
+      template = el.csvColumn ? `{{${el.csvColumn}}}` : '{{Name}}';
+    } else {
+      return '';
+    }
   }
   let out = String(template).replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_m, col) => {
     const key = col.trim();
     return row && row[key] != null && row[key] !== '' ? String(row[key]) : '';
   });
-  if (!out && participantName && (el.id === 'name' || !el.csvColumn)) out = participantName;
+  if (!out && participantName && (el.id === 'name' || (el.type === 'csv' && !el.csvColumn))) out = participantName;
   return out;
 }
 
