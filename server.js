@@ -152,6 +152,8 @@ app.post('/api/generate', (req, res) => {
         date,
         outputDir: batchDir,
         positions,
+        records,
+        nameColumn,
       });
 
       // Build response with download URLs
