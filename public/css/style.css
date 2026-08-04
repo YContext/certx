@@ -132,6 +132,37 @@ body {
   line-height: 1.7;
 }
 
+/* ───────── Demo Video ───────── */
+.video {
+  text-align: center;
+  padding: 8px 24px 40px;
+}
+
+.video__inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.video__frame {
+  margin-top: 20px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  background: #000;
+}
+
+.video__frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 /* ───────── App Container ───────── */
 .app {
   max-width: 780px;
