@@ -1825,6 +1825,9 @@
   }
 
   function init() {
+    const yearEl = document.getElementById('footer-year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
     initDropzone('template');
     initDropzone('csv');
     els.btnToEditor.addEventListener('click', () => goToStep(2));
