@@ -247,6 +247,9 @@
             <button class="toolbar-btn" id="tool-snap" title="Toggle snap to grid">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"/><path d="M12 14v8"/><path d="M2 12h8"/><path d="M14 12h8"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg>
             </button>
+            <button class="toolbar-btn" id="tool-shortcuts" title="Keyboard Shortcuts (K)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </button>
           </div>
         </div>
 
@@ -291,6 +294,7 @@
           <div class="progress__bar" id="progress-bar"></div>
         </div>
         <p class="progress__text" id="progress-text">Starting...</p>
+        <div class="progress__log" id="progress-log"></div>
       </div>
 
       <!-- Results -->
@@ -314,6 +318,34 @@
     </section>
 
   </main>
+
+  <!-- ─── Shortcuts Modal ─── -->
+  <div class="modal" id="shortcuts-modal" style="display: none;">
+    <div class="modal__content shortcuts-modal-content">
+      <h3 class="modal__title">Keyboard Shortcuts</h3>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item"><kbd>V</kbd><span>Select Tool</span></div>
+        <div class="shortcut-item"><kbd>T</kbd><span>Add Text Field</span></div>
+        <div class="shortcut-item"><kbd>D</kbd><span>Add CSV Data Field</span></div>
+        <div class="shortcut-item"><kbd>R</kbd><span>Add Rectangle</span></div>
+        <div class="shortcut-item"><kbd>O</kbd><span>Add Ellipse</span></div>
+        <div class="shortcut-item"><kbd>L</kbd><span>Add Line</span></div>
+        <div class="shortcut-item"><kbd>G</kbd><span>Toggle Grid overlay</span></div>
+        <div class="shortcut-item"><kbd>Del / Backspace</kbd><span>Delete Selection</span></div>
+        <div class="shortcut-item"><kbd>Ctrl + Z</kbd><span>Undo</span></div>
+        <div class="shortcut-item"><kbd>Ctrl + Shift + Z</kbd><span>Redo</span></div>
+        <div class="shortcut-item"><kbd>Ctrl + D</kbd><span>Duplicate Selection</span></div>
+        <div class="shortcut-item"><kbd>Ctrl + C</kbd><span>Copy Selection</span></div>
+        <div class="shortcut-item"><kbd>Ctrl + V</kbd><span>Paste Elements</span></div>
+        <div class="shortcut-item"><kbd>Arrows</kbd><span>Nudge Elements (1px)</span></div>
+        <div class="shortcut-item"><kbd>Shift + Arrows</kbd><span>Nudge Elements (5px)</span></div>
+        <div class="shortcut-item"><kbd>Space + Drag</kbd><span>Pan Workspace Canvas</span></div>
+        <div class="shortcut-item"><kbd>Ctrl + Wheel</kbd><span>Zoom In / Out</span></div>
+        <div class="shortcut-item"><kbd>0</kbd><span>Fit canvas to screen</span></div>
+      </div>
+      <button class="modal__close" id="close-shortcuts-modal" type="button" aria-label="Close modal">&times;</button>
+    </div>
+  </div>
 
   <!-- ─── Toast ─── -->
   <div class="toast-container" id="toast-container"></div>
