@@ -557,10 +557,17 @@
     toolBtns.forEach((b) => b.classList.toggle('is-active', b.dataset.tool === editor.tool));
     document.getElementById('tool-grid').classList.toggle('is-on', editor.grid);
     document.getElementById('tool-snap').classList.toggle('is-on', editor.snap);
+
+    // Disable undo / redo buttons dynamically if queue is empty
+    const undoBtn = document.getElementById('tool-undo');
+    const redoBtn = document.getElementById('tool-redo');
+    if (undoBtn) undoBtn.disabled = editor.history.length === 0;
+    if (redoBtn) redoBtn.disabled = editor.redo.length === 0;
+
     els.footerHint.textContent =
-      n === 0 ? 'Drag to move · Double-click text to edit · ⇧+drag multi-select · Ctrl+wheel zoom · Space+drag pan'
-      : n === 1 ? `${n} element selected · Drag to move · ⇧+drag to multi-select`
-      : `${n} elements selected`;
+      n === 0 ? 'Drag to move · Double-click text to edit · ⇧+drag multi-select · Ctrl+wheel zoom · Space+drag pan · K for shortcuts'
+      : n === 1 ? `${n} element selected · Drag to move · ⇧+drag to multi-select · K for shortcuts`
+      : `${n} elements selected · K for shortcuts`;
     els.editorCanvas.dataset.tool = editor.tool;
   }
 
@@ -1031,6 +1038,7 @@
     editor.history.push(s);
     if (editor.history.length > 100) editor.history.shift();
     editor.redo = [];
+    updateToolbarState();
   }
 
   function restore(s) {
@@ -1043,6 +1051,7 @@
     });
     editor.selection.clear();
     renderAll();
+    updateToolbarState();
   }
 
   function undo() {
@@ -1220,6 +1229,16 @@
     return t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable;
   }
 
+  function toggleShortcutsModal() {
+    const modal = document.getElementById('shortcuts-modal');
+    if (!modal) return;
+    if (modal.style.display === 'none' || !modal.style.display) {
+      modal.style.display = 'flex';
+    } else {
+      modal.style.display = 'none';
+    }
+  }
+
   function onKeyDown(e) {
     if (state.currentStep !== 2) return;
     if (e.code === 'Space' && !isTyping(e)) {
@@ -1237,12 +1256,18 @@
     if (mod) return;
 
     switch (e.key) {
+      case 'k':
+      case 'K':
+        toggleShortcutsModal();
+        return;
       case 'Delete':
       case 'Backspace':
         e.preventDefault();
         deleteSelected();
         return;
       case 'Escape':
+        const sm = document.getElementById('shortcuts-modal');
+        if (sm && sm.style.display === 'flex') { sm.style.display = 'none'; return; }
         if (editor.editingId) { cancelInlineEdit(); return; }
         if (editor.selection.size) { clearSelection(); return; }
         setTool('select');
@@ -1396,6 +1421,21 @@
       </div>`;
   };
 
+  function makeAccordionSection(title, contentHtml, defaultOpen = true) {
+    const sectionId = 'sec-' + title.toLowerCase().replace(/[^a-z]/g, '');
+    const isOpenClass = defaultOpen ? ' is-open' : '';
+    return `
+      <div class="prop-accordion${isOpenClass}" id="${sectionId}">
+        <div class="prop-accordion__header">
+          <span>${title}</span>
+          <span class="prop-accordion__icon">▸</span>
+        </div>
+        <div class="prop-accordion__content">
+          ${contentHtml}
+        </div>
+      </div>`;
+  }
+
   function panelSingleHTML(id) {
     const el = editor.elements[id];
     const isText = el.type === 'text' || el.type === 'csv';
@@ -1409,7 +1449,7 @@
     };
 
     let html = `
-      <div class="panel__section">
+      <div class="panel__section" style="border-bottom:1px solid var(--border)">
         <div class="panel__name">
           <div class="panel__name-icon">${getHeaderIcon(el.type)}</div>
           <div>
@@ -1419,13 +1459,13 @@
         </div>
       </div>`;
 
+    let sectionsHtml = '';
+
     if (isText) {
       const row = firstRow();
       const cols = state.csvData ? state.csvData.columns : [];
-      html += `
-      <div class="panel__section">
-        <div class="panel__label">${el.type === 'csv' ? 'Data &amp; Format' : 'Content'}</div>
-        ${el.type === 'csv' ? `
+
+      const contentSection = el.type === 'csv' ? `
         <div class="prop-field" style="margin-bottom:8px">
           <label>Data column</label>
           <select class="select" data-p="csvColumn">
@@ -1438,12 +1478,12 @@
           <textarea class="text-input text-input--area" data-p="text">${escapeHtml(el.text || '')}</textarea>
         </div>
         ${row ? `<div class="panel__row" style="font-size:.72rem;color:var(--text-secondary)">Preview: <strong style="margin-left:4px">${escapeHtml(sampleText(el))}</strong></div>` : ''}
-        ` : `
+      ` : `
         <textarea class="text-input text-input--area" data-p="text">${escapeHtml(el.text || '')}</textarea>
-        `}
-      </div>
-      <div class="panel__section">
-        <div class="panel__label">Font</div>
+      `;
+      sectionsHtml += makeAccordionSection('Content & Data', contentSection, true);
+
+      const fontSection = `
         <div class="prop-field" style="margin-bottom:8px">
           <select class="select" data-p="fontFamily">
             ${FONT_FAMILIES.map((f) => `<option ${el.fontFamily === f ? 'selected' : ''}>${f}</option>`).join('')}
@@ -1453,7 +1493,7 @@
           <input class="slider" type="range" min="8" max="300" step="1" value="${el.fontSize}" data-p="fontSize" />
           <input class="num-input" style="width:64px" type="number" min="8" max="300" value="${el.fontSize}" data-p="fontSize" />
         </div>
-        <div class="panel__row">
+        <div class="panel__row" style="margin-top:8px">
           <button class="icon-btn ${el.fontWeight >= 600 ? 'is-active' : ''}" data-p="bold" title="Bold">B</button>
           <button class="icon-btn ${el.fontStyle === 'italic' ? 'is-active' : ''}" data-p="italic" title="Italic"><em>I</em></button>
           <button class="icon-btn ${el.underline ? 'is-active' : ''}" data-p="underline" title="Underline"><u>U</u></button>
@@ -1473,9 +1513,10 @@
           <input class="slider" type="range" min="0.8" max="2.5" step="0.05" value="${el.lineHeight || 1.2}" data-p="lineHeight" />
           <span style="font-size:.7rem;width:24px;text-align:right">${(el.lineHeight || 1.2).toFixed(2)}</span>
         </div>
-      </div>
-      <div class="panel__section">
-        <div class="panel__label">Alignment</div>
+      `;
+      sectionsHtml += makeAccordionSection('Typography', fontSection, true);
+
+      const alignSection = `
         <div class="panel__row">
           <div class="seg" style="flex:1">
             ${['left', 'center', 'right'].map((a) => {
@@ -1493,9 +1534,10 @@
                ['bottom', `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="18" width="16" height="3" rx="1"/><line x1="12" y1="4" x2="12" y2="15"/><polyline points="8 11 12 15 16 11"/></svg>`]].map(([a, g]) => `<button class="seg__btn ${el.vAlign === a ? 'is-active' : ''}" data-p="vAlign" data-val="${a}">${g}</button>`).join('')}
           </div>
         </div>
-      </div>
-      <div class="panel__section">
-        <div class="panel__label">Color</div>
+      `;
+      sectionsHtml += makeAccordionSection('Alignment', alignSection, false);
+
+      const colorSection = `
         <div class="prop-field" style="margin-bottom:8px">
           <label>Text color</label>
           <div class="color-row">
@@ -1514,19 +1556,28 @@
           <input class="slider" type="range" min="0" max="100" step="1" value="${el.opacity}" data-p="opacity" />
           <span style="font-size:.7rem;width:28px;text-align:right">${el.opacity}%</span>
         </div>
-      </div>`;
+      `;
+      sectionsHtml += makeAccordionSection('Color & Opacity', colorSection, false);
     } else {
       const shapeColor = el.type === 'line' ? (el.stroke || '#1a1a2e') : (el.fill || '#6366f1');
-      html += `
-      <div class="panel__section">
-        <div class="panel__label">Style</div>
-        ${el.type === 'line' ? `
+      const styleSection = el.type === 'line' ? `
         <div class="prop-field" style="margin-bottom:8px">
           <label>Color</label>
           <div class="color-row">${SHAPE_FILLS.map((c) => swatchHTML(c, shapeColor, 'stroke')).join('')}
             <input type="color" class="color-input" data-p="stroke" value="${el.stroke && el.stroke !== 'transparent' ? el.stroke : '#1a1a2e'}" />
           </div>
-        </div>` : `
+        </div>
+        <div class="panel__row">
+          <span style="font-size:.72rem;color:var(--text-secondary);width:88px">Width</span>
+          <input class="slider" type="range" min="1" max="30" step="1" value="${el.strokeWidth || 3}" data-p="strokeWidth" />
+          <span style="font-size:.7rem;width:24px;text-align:right">${el.strokeWidth || 3}</span>
+        </div>
+        <div class="panel__row">
+          <span style="font-size:.72rem;color:var(--text-secondary);width:88px">Opacity</span>
+          <input class="slider" type="range" min="0" max="100" step="1" value="${el.opacity}" data-p="opacity" />
+          <span style="font-size:.7rem;width:28px;text-align:right">${el.opacity}%</span>
+        </div>
+      ` : `
         <div class="prop-field" style="margin-bottom:8px">
           <label>Fill</label>
           <div class="color-row">${SHAPE_FILLS.map((c) => swatchHTML(c, shapeColor, 'fill')).join('')}
@@ -1542,8 +1593,8 @@
         </div>
         <div class="panel__row">
           <span style="font-size:.72rem;color:var(--text-secondary);width:88px">Outline</span>
-          <input class="slider" type="range" min="0" max="30" step="1" value="${el.strokeWidth || (el.type === 'line' ? 3 : 2)}" data-p="strokeWidth" />
-          <span style="font-size:.7rem;width:24px;text-align:right">${el.strokeWidth || (el.type === 'line' ? 3 : 2)}</span>
+          <input class="slider" type="range" min="0" max="30" step="1" value="${el.strokeWidth || 2}" data-p="strokeWidth" />
+          <span style="font-size:.7rem;width:24px;text-align:right">${el.strokeWidth || 2}</span>
         </div>
         ${el.type === 'rect' ? `
         <div class="panel__row">
@@ -1556,47 +1607,48 @@
           <input class="slider" type="range" min="0" max="100" step="1" value="${el.opacity}" data-p="opacity" />
           <span style="font-size:.7rem;width:28px;text-align:right">${el.opacity}%</span>
         </div>
-        `}
-      </div>`;
+      `;
+      sectionsHtml += makeAccordionSection('Shape Style', styleSection, true);
     }
 
-    html += `
-      <div class="panel__section">
-        <div class="panel__label">Position &amp; Size <span style="text-transform:none;font-weight:400">(% of template)</span></div>
-        <div class="prop-grid">
-          <div class="prop-field"><label>X</label><input class="num-input" type="number" step="0.5" value="${Math.round(el.x * 10) / 10}" data-p="x" /></div>
-          <div class="prop-field"><label>Y</label><input class="num-input" type="number" step="0.5" value="${Math.round(el.y * 10) / 10}" data-p="y" /></div>
-          <div class="prop-field"><label>W</label><input class="num-input" type="number" step="0.5" value="${Math.round(el.width * 10) / 10}" data-p="w" /></div>
-          <div class="prop-field"><label>H</label><input class="num-input" type="number" step="0.5" value="${Math.round(el.height * 10) / 10}" data-p="h" /></div>
-          ${el.type !== 'line' ? `<div class="prop-field"><label>Rot</label><input class="num-input" type="number" step="1" value="${el.rotation || 0}" data-p="rotation" /></div>` : ''}
-        </div>
+    const posSection = `
+      <div class="prop-grid">
+        <div class="prop-field"><label>X</label><input class="num-input" type="number" step="0.5" value="${Math.round(el.x * 10) / 10}" data-p="x" /></div>
+        <div class="prop-field"><label>Y</label><input class="num-input" type="number" step="0.5" value="${Math.round(el.y * 10) / 10}" data-p="y" /></div>
+        <div class="prop-field"><label>W</label><input class="num-input" type="number" step="0.5" value="${Math.round(el.width * 10) / 10}" data-p="w" /></div>
+        <div class="prop-field"><label>H</label><input class="num-input" type="number" step="0.5" value="${Math.round(el.height * 10) / 10}" data-p="h" /></div>
+        ${el.type !== 'line' ? `<div class="prop-field"><label>Rot</label><input class="num-input" type="number" step="1" value="${el.rotation || 0}" data-p="rotation" /></div>` : ''}
       </div>
-      <div class="panel__section">
-        <div class="panel__label">Arrange</div>
-        <div class="switch-row">
-          <span>Visible on certificate</span>
-          <button class="switch ${el.enabled ? 'is-on' : ''}" data-p="enabled" data-val="${el.enabled ? 1 : 0}"></button>
-        </div>
-        <div class="panel-actions" style="margin-top:10px">
-          <button class="panel-btn" data-act="duplicate">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Duplicate
-          </button>
-          <button class="panel-btn" data-act="front">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
-            Front
-          </button>
-          <button class="panel-btn" data-act="back">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
-            Back
-          </button>
-          <button class="panel-btn panel-btn--danger" data-act="delete">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            Delete
-          </button>
-        </div>
+    `;
+    sectionsHtml += makeAccordionSection('Dimensions', posSection, false);
+
+    const arrangeSection = `
+      <div class="switch-row" style="margin-bottom:8px">
+        <span>Visible on certificate</span>
+        <button class="switch ${el.enabled ? 'is-on' : ''}" data-p="enabled" data-val="${el.enabled ? 1 : 0}"></button>
       </div>
-      ${layersHTML()}`;
+      <div class="panel-actions">
+        <button class="panel-btn" data-act="duplicate">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Duplicate
+        </button>
+        <button class="panel-btn" data-act="front">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+          Front
+        </button>
+        <button class="panel-btn" data-act="back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+          Back
+        </button>
+        <button class="panel-btn panel-btn--danger" data-act="delete">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Delete
+        </button>
+      </div>
+    `;
+    sectionsHtml += makeAccordionSection('Arrange Depth', arrangeSection, false);
+
+    html += sectionsHtml + layersHTML();
     return html;
   }
 
@@ -1609,6 +1661,14 @@
 
   // ── Panel events (delegated, bound once at load) ─────────────
   els.editorPanel.addEventListener('click', (e) => {
+      // Accordion header click handling
+      const accordionHeader = e.target.closest('.prop-accordion__header');
+      if (accordionHeader) {
+        const accordion = accordionHeader.parentElement;
+        accordion.classList.toggle('is-open');
+        return;
+      }
+
       const add = e.target.closest('[data-add]');
       if (add) {
         const t = add.dataset.add;
@@ -1759,9 +1819,27 @@
       if (btn.id === 'tool-back') zMove('back');
       if (btn.id === 'tool-grid') toggleGrid();
       if (btn.id === 'tool-snap') toggleSnap();
+      if (btn.id === 'tool-shortcuts') toggleShortcutsModal();
       const al = btn.dataset.align;
       if (al) alignSelection(al);
     });
+
+    const closeShortcuts = document.getElementById('close-shortcuts-modal');
+    if (closeShortcuts) {
+      closeShortcuts.addEventListener('click', () => {
+        const modal = document.getElementById('shortcuts-modal');
+        if (modal) modal.style.display = 'none';
+      });
+    }
+
+    const shortcutsModal = document.getElementById('shortcuts-modal');
+    if (shortcutsModal) {
+      shortcutsModal.addEventListener('click', (ev) => {
+        if (ev.target === shortcutsModal) {
+          shortcutsModal.style.display = 'none';
+        }
+      });
+    }
 
     // Panel delegation — bound once, the panel element persists.
     const panel = els.editorPanel;
@@ -1806,23 +1884,63 @@
     hide(els.resultsArea);
     show(els.progressArea);
     els.progressBar.style.width = '0%';
-    els.progressText.textContent = 'Rendering certificates...';
+    els.progressText.textContent = 'Initiating certificate generator...';
+
+    const logBox = document.getElementById('progress-log');
+    if (logBox) logBox.innerHTML = '<div>[INFO] Starting batch processing...</div>';
+
     goToStep(3);
     setLoading(els.btnToGenerate, true);
     els.btnDownloadAll.style.display = 'none';
 
     try {
+      const totalNames = state.csvData ? state.csvData.totalRows : 1;
+      let progressVal = 0;
+
+      // Simulate real step updates for outstanding UX
+      const interval = setInterval(() => {
+        if (progressVal < 90) {
+          progressVal += Math.floor(Math.random() * 15) + 5;
+          progressVal = Math.min(progressVal, 90);
+          els.progressBar.style.width = progressVal + '%';
+
+          if (logBox) {
+            const steps = [
+              'Loading templates into memory...',
+              'Parsing participant details...',
+              'Calculating typography dimensions...',
+              'Drawing visual elements and custom shapes...',
+              'Rendering high-fidelity vector text...',
+              'Optimizing PNG image files...',
+              'Bundling ZIP archive packages...'
+            ];
+            const randStep = steps[Math.floor(Math.random() * steps.length)];
+            logBox.innerHTML += `<div>[RENDER] ${randStep}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+          }
+        }
+      }, 350);
+
       const res = await fetch('/api/generate', { method: 'POST', body: fd });
+      clearInterval(interval);
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+
       state.certificates = data.certificates;
       els.progressBar.style.width = '100%';
-      els.progressText.textContent = `Generated ${data.total} certificate${data.total !== 1 ? 's' : ''}!`;
+      els.progressText.textContent = `Completed! Generated ${data.total} certificate${data.total !== 1 ? 's' : ''}.`;
+
+      if (logBox) {
+        logBox.innerHTML += `<div>[SUCCESS] Generated ${data.total} certificates successfully.</div>`;
+        logBox.scrollTop = logBox.scrollHeight;
+      }
+
       setTimeout(() => {
         hide(els.progressArea);
         renderResults(data);
         show(els.resultsArea);
-      }, 400);
+      }, 600);
     } catch (err) {
       toast(err.message, 'error');
       hide(els.progressArea);
@@ -1838,12 +1956,12 @@
     els.btnDownloadAll.href = downloadAllUrl;
     els.btnDownloadAll.style.display = 'inline-flex';
     els.gallery.innerHTML = '';
-    certificates.forEach((cert) => {
+    certificates.forEach((cert, idx) => {
       const card = document.createElement('div');
       card.className = 'gallery__card';
       const img = document.createElement('img');
       img.src = cert.url; img.alt = cert.name; img.loading = 'lazy';
-      img.addEventListener('click', () => openLightbox(cert.url, cert.name));
+      img.addEventListener('click', () => openLightbox(idx));
       const body = document.createElement('div');
       body.className = 'gallery__card-body';
       const nameEl = document.createElement('div');
@@ -1866,25 +1984,97 @@
   }
 
   // ── Lightbox ──────────────────────────────────────────────
-  function openLightbox(src, name) {
+  let currentLightboxIdx = 0;
+
+  function openLightbox(idx) {
+    currentLightboxIdx = idx;
+    const certs = state.certificates;
+    if (!certs || !certs[idx]) return;
+    const cert = certs[idx];
+
     const existing = document.querySelector('.modal');
     if (existing) existing.remove();
+
     const modal = document.createElement('div');
     modal.className = 'modal';
+
     const content = document.createElement('div');
     content.className = 'modal__content';
+
     const img = document.createElement('img');
-    img.src = src; img.alt = name;
+    img.src = cert.url; img.alt = cert.name;
+    img.id = 'lightbox-img';
+
+    // Navigation buttons
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'lightbox-nav lightbox-nav--prev';
+    prevBtn.innerHTML = '&#10094;';
+    prevBtn.addEventListener('click', (e) => { e.stopPropagation(); navigateLightbox(-1); });
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'lightbox-nav lightbox-nav--next';
+    nextBtn.innerHTML = '&#10095;';
+    nextBtn.addEventListener('click', (e) => { e.stopPropagation(); navigateLightbox(1); });
+
+    const metaBar = document.createElement('div');
+    metaBar.className = 'lightbox-meta';
+
+    const metaTitle = document.createElement('div');
+    metaTitle.className = 'lightbox-title';
+    metaTitle.id = 'lightbox-title';
+    metaTitle.textContent = cert.name;
+
+    const dlBtn = document.createElement('a');
+    dlBtn.className = 'lightbox-btn';
+    dlBtn.id = 'lightbox-download';
+    dlBtn.textContent = 'Download';
+    dlBtn.href = cert.url;
+    dlBtn.download = cert.filename;
+
+    metaBar.appendChild(metaTitle);
+    metaBar.appendChild(dlBtn);
+
     const close = document.createElement('button');
     close.className = 'modal__close';
     close.innerHTML = '&times;';
     close.addEventListener('click', () => modal.remove());
-    content.appendChild(img); content.appendChild(close);
+
+    content.appendChild(img);
+    content.appendChild(prevBtn);
+    content.appendChild(nextBtn);
+    content.appendChild(metaBar);
+    content.appendChild(close);
     modal.appendChild(content);
+
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
     document.body.appendChild(modal);
-    const esc = (e) => { if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', esc); } };
+
+    const esc = (e) => {
+      if (e.key === 'Escape') {
+        modal.remove();
+        document.removeEventListener('keydown', esc);
+      } else if (e.key === 'ArrowLeft') {
+        navigateLightbox(-1);
+      } else if (e.key === 'ArrowRight') {
+        navigateLightbox(1);
+      }
+    };
     document.addEventListener('keydown', esc);
+  }
+
+  function navigateLightbox(dir) {
+    const certs = state.certificates;
+    if (!certs || !certs.length) return;
+    currentLightboxIdx = (currentLightboxIdx + dir + certs.length) % certs.length;
+    const cert = certs[currentLightboxIdx];
+
+    const img = document.getElementById('lightbox-img');
+    const title = document.getElementById('lightbox-title');
+    const dl = document.getElementById('lightbox-download');
+
+    if (img) { img.src = cert.url; img.alt = cert.name; }
+    if (title) title.textContent = cert.name;
+    if (dl) { dl.href = cert.url; dl.download = cert.filename; }
   }
 
   // ── Init ──────────────────────────────────────────────────
